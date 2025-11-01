@@ -26,10 +26,8 @@ const Praise = () => {
 
       <main className="py-20 px-4">
         <section className="max-w-2xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Private Praise</h1>
-          <p className="text-lg text-blue-100">
-            This gallery is private. Enter the password to unlock it.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Private</h1>
+          <p className="text-lg text-blue-100">Enter password.</p>
         </section>
 
         {!isUnlocked ? (

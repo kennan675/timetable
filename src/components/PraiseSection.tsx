@@ -1,17 +1,48 @@
+import { useMemo } from 'react';
+
+interface PraiseImage {
+  src: string;
+  label: string;
+}
+
+const praiseImageModules = import.meta.glob<{ default: string }>(
+  '../../praise/*.{png,jpg,jpeg,PNG,JPG,JPEG}',
+  { eager: true }
+) as Record<string, { default: string }>;
+
+const praiseImages: PraiseImage[] = Object.entries(praiseImageModules)
+  .map(([path, module]) => {
+    const filename = path.split('/').pop() ?? 'praise';
+    const name = filename.replace(/\.[^/.]+$/, '');
+    const label = name.replace(/[-_]/g, ' ');
+    return { src: module.default, label };
+  })
+  .sort((a, b) => a.label.localeCompare(b.label));
+
 export const PraiseSection = () => {
+  const images = useMemo(() => praiseImages, []);
+
   return (
     <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-8 shadow-xl">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Praise</h2>
-      
-      <div className="flex justify-center">
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity animate-pulse" />
-          <img 
-            src="https://d64gsuwffb70l.cloudfront.net/689d6fc2a501c25bc06adda5_1762001549167_0992f25a.png"
-            alt="Praise"
-            className="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-white shadow-2xl"
-          />
-        </div>
+      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Praise Gallery</h2>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {images.map(image => (
+          <figure
+            key={image.src}
+            className="relative overflow-hidden rounded-2xl shadow-lg group"
+          >
+            <img
+              src={image.src}
+              alt={image.label}
+              className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-xs uppercase tracking-wide px-3 py-2">
+              {image.label}
+            </figcaption>
+          </figure>
+        ))}
       </div>
     </div>
   );
