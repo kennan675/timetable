@@ -1,0 +1,64 @@
+import { Navigation } from './Navigation';
+import { CountdownTimer } from './CountdownTimer';
+import { DigitalClock } from './DigitalClock';
+import { ProgressBar } from './ProgressBar';
+import { StatsCard } from './StatsCard';
+import { QuoteRotator } from './QuoteRotator';
+import { MotivationSection } from './MotivationSection';
+import { Footer } from './Footer';
+
+export default function AppLayout() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      <Navigation />
+
+      {/* Hero Section */}
+      <section id="home" className="relative py-20 px-4 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(https://d64gsuwffb70l.cloudfront.net/690601180dd533794e18430b_1762001226657_558cd244.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto text-center">
+          <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+            <div className="text-white text-sm">November 2025</div>
+            <DigitalClock />
+          </div>
+
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+            Kennan Bowen | Study Hub 📚
+          </h1>
+
+          <p className="text-2xl text-yellow-300 mb-12 italic">
+            "Discipline now, freedom later."
+          </p>
+
+          <div className="mb-8">
+            <h3 className="text-white text-lg mb-4">Time Until First Exam</h3>
+            <CountdownTimer />
+          </div>
+
+          <div className="mt-12 mb-8">
+            <ProgressBar />
+          </div>
+
+          <StatsCard />
+          <QuoteRotator />
+        </div>
+      </section>
+
+      {/* Motivation */}
+      <section id="motivation" className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <MotivationSection />
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
