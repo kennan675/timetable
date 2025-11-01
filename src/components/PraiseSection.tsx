@@ -27,19 +27,19 @@ export const PraiseSection = () => {
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Praise Gallery</h2>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {images.map(image => (
+        {images.map((image, index) => (
           <figure
             key={image.src}
             className="relative overflow-hidden rounded-2xl shadow-lg group"
           >
             <img
               src={image.src}
-              alt={image.label}
+              alt={`Praise memory ${index + 1}`}
               className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             />
-            <figcaption className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-xs uppercase tracking-wide px-3 py-2">
-              {image.label}
+            <figcaption className="sr-only">
+              Praise memory {index + 1}
             </figcaption>
           </figure>
         ))}
