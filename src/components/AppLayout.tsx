@@ -4,7 +4,6 @@ import { DigitalClock } from './DigitalClock';
 import { ProgressBar } from './ProgressBar';
 import { StatsCard } from './StatsCard';
 import { QuoteRotator } from './QuoteRotator';
-import { MotivationSection } from './MotivationSection';
 import { Footer } from './Footer';
 
 export default function AppLayout() {
@@ -48,13 +47,6 @@ export default function AppLayout() {
 
           <StatsCard />
           <QuoteRotator />
-        </div>
-      </section>
-
-      {/* Motivation */}
-      <section id="motivation" className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <MotivationSection />
         </div>
       </section>
 

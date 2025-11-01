@@ -1,4 +1,4 @@
-export const MotivationSection = () => {
+export const PraiseSection = () => {
   return (
     <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-8 shadow-xl">
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Praise</h2>

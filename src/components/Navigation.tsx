@@ -1,36 +1,19 @@
 import { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-type NavItem =
-  | { label: string; type: 'route'; path: string }
-  | { label: string; type: 'section'; sectionId: string };
+interface NavItem {
+  label: string;
+  path: string;
+}
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleSectionNavigation = (sectionId: string) => {
-    if (location.pathname !== '/') {
-      navigate('/', { state: { scrollTo: sectionId } });
-    } else {
-      scrollToSection(sectionId);
-    }
-    setIsOpen(false);
-  };
 
   const navItems: NavItem[] = [
-    { label: 'Home', type: 'route', path: '/' },
-    { label: 'Study Timetable', type: 'route', path: '/study-timetable' },
-    { label: 'Study Plan', type: 'route', path: '/study-plan' },
-    { label: 'Motivation', type: 'section', sectionId: 'motivation' }
+    { label: 'Home', path: '/' },
+    { label: 'Study Timetable', path: '/study-timetable' },
+    { label: 'Study Plan', path: '/study-plan' },
+    { label: 'Praise', path: '/praise' }
   ];
 
   return (
@@ -40,30 +23,20 @@ export const Navigation = () => {
           <div className="text-white font-bold text-xl">KB Study Hub</div>
 
           <div className="hidden md:flex space-x-8">
-            {navItems.map(item =>
-              item.type === 'route' ? (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `text-white hover:text-yellow-300 transition-colors font-medium ${
-                      isActive ? 'text-yellow-300' : ''
-                    }`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.label}
-                </NavLink>
-              ) : (
-                <button
-                  key={item.sectionId}
-                  onClick={() => handleSectionNavigation(item.sectionId)}
-                  className="text-white hover:text-yellow-300 transition-colors font-medium"
-                >
-                  {item.label}
-                </button>
-              )
-            )}
+            {navItems.map(item => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `text-white hover:text-yellow-300 transition-colors font-medium ${
+                    isActive ? 'text-yellow-300' : ''
+                  }`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </div>
 
           <button
@@ -78,30 +51,20 @@ export const Navigation = () => {
 
         {isOpen && (
           <div className="md:hidden pb-4 space-y-2">
-            {navItems.map(item =>
-              item.type === 'route' ? (
-                <NavLink
-                  key={`${item.path}-mobile`}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `block w-full text-left text-white hover:bg-white/10 px-4 py-2 rounded ${
-                      isActive ? 'bg-white/10 text-yellow-300' : ''
-                    }`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.label}
-                </NavLink>
-              ) : (
-                <button
-                  key={`${item.sectionId}-mobile`}
-                  onClick={() => handleSectionNavigation(item.sectionId)}
-                  className="block w-full text-left text-white hover:bg-white/10 px-4 py-2 rounded"
-                >
-                  {item.label}
-                </button>
-              )
-            )}
+            {navItems.map(item => (
+              <NavLink
+                key={`${item.path}-mobile`}
+                to={item.path}
+                className={({ isActive }) =>
+                  `block w-full text-left text-white hover:bg-white/10 px-4 py-2 rounded ${
+                    isActive ? 'bg-white/10 text-yellow-300' : ''
+                  }`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </div>
         )}
       </div>
