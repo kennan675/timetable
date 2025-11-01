@@ -11,16 +11,16 @@ export const Navigation = () => {
 
   const navItems: NavItem[] = [
     { label: 'Home', path: '/' },
-    { label: 'Study Timetable', path: '/study-timetable' },
+    { label: 'Exam Timetable', path: '/study-timetable' },
     { label: 'Study Plan', path: '/study-plan' },
-    { label: 'Praise', path: '/praise' }
+    { label: 'My Motivation', path: '/praise' }
   ];
 
   return (
     <nav className="bg-white/10 backdrop-blur-md shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="text-white font-bold text-xl">KB Study Hub</div>
+          <div className="text-white font-bold text-xl">Kennan Study Hub</div>
 
           <div className="hidden md:flex space-x-8">
             {navItems.map(item => (
