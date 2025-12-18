@@ -7,25 +7,51 @@ const genAI = new GoogleGenerativeAI("AIzaSyAtWWL08-vLKMu1And_p2rFku5yZ3_0GiI");
 
 const MODEL_NAME = "gemini-1.5-pro";
 
+// Helper to convert file to GoogleGenerativeAI.Part
+async function fileToGenerativePart(file: File): Promise<{ inlineData: { data: string; mimeType: string } }> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = (reader.result as string).split(',')[1];
+      resolve({
+        inlineData: {
+          data: base64Data,
+          mimeType: file.type,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 interface GeneratePlanParams {
   examData: string;
   availability: string;
   startDate: string;
+  image?: File | null;
 }
 
-export const generateStudyPlan = async ({ examData, availability, startDate }: GeneratePlanParams) => {
+export const generateStudyPlan = async ({ examData, availability, startDate, image }: GeneratePlanParams) => {
   const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-  const prompt = `
+  let textPrompt = `
 ### ROLE
 You are the "AI Study Architect," a high-performance educational consultant specializing in cognitive science and spaced repetition. Your goal is to transform messy exam schedules into optimized, stress-free study plans.
 
 ### INPUT DATA
-1. **Raw Exam Data:** ${examData}
+1. **Details provided:** ${examData}
 2. **Daily Availability:** ${availability}
 3. **Current Date:** ${startDate}
 4. **Subject Weights:** Infer the weights based on the exam data context or assign default (3) if unsure.
+`;
 
+  if (image) {
+    textPrompt += `
+    **NOTE:** The user has uploaded an image of their timetable. Extract the exam dates, times, and subjects directly from this image. Merge this with any text details provided above.
+    `;
+  }
+
+  textPrompt += `
 ### LOGIC CONSTRAINTS
 - **Prioritize the "Weak" or "Hard":** Critical subjects receive more study slots.
 - **Tapering:** Increase intensity as the exam date approaches, but include 1 "Buffer Day" before each exam for pure revision.
@@ -57,7 +83,13 @@ Schema:
 `;
 
   try {
-    const result = await model.generateContent(prompt);
+    const parts: any[] = [textPrompt];
+    if (image) {
+      const imagePart = await fileToGenerativePart(image);
+      parts.push(imagePart);
+    }
+
+    const result = await model.generateContent(parts);
     const response = await result.response;
     const text = response.text();
 

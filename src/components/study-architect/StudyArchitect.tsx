@@ -9,7 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Upload, Loader2, BookOpen, Clock, Brain } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, Loader2, BookOpen, Clock, Brain, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateStudyPlan } from "@/services/gemini";
 import { useToast } from "@/hooks/use-toast";
@@ -36,13 +36,14 @@ export default function StudyArchitect() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [examData, setExamData] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [availability, setAvailability] = useState("4 hours on weekdays, 8 on weekends");
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [plan, setPlan] = useState<StudyPlanResponse | null>(null);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
-    if (!examData || !startDate) {
+    if ((!examData && !imageFile) || !startDate) {
       toast({
         title: "Missing Information",
         description: "Please provide exam data and a start date.",
@@ -57,6 +58,7 @@ export default function StudyArchitect() {
         examData,
         availability,
         startDate: startDate.toISOString().split('T')[0],
+        image: imageFile,
       });
       setPlan(result);
       setStep(2);
@@ -104,10 +106,34 @@ export default function StudyArchitect() {
                     <Label>Raw Exam Data</Label>
                     <Textarea
                       placeholder="Paste your exam schedule here (e.g., 'Math on Dec 20, Physics on Dec 22')..."
-                      className="min-h-[120px] resize-none"
+                      className="min-h-[100px] resize-none"
                       value={examData}
                       onChange={(e) => setExamData(e.target.value)}
                     />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white dark:bg-slate-900 px-2 text-muted-foreground">Or upload an image</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="cursor-pointer"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setImageFile(file);
+                        }}
+                      />
+                      {imageFile && (
+                        <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" /> Attached
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -147,8 +173,8 @@ export default function StudyArchitect() {
                     </div>
                   </div>
 
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full text-lg font-semibold h-12 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg hover:shadow-primary/25"
                     onClick={handleGenerate}
                     disabled={loading}
@@ -156,7 +182,7 @@ export default function StudyArchitect() {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Generating Wisdom...
+                        Analyzing Timetable...
                       </>
                     ) : (
                       <>
@@ -231,8 +257,8 @@ export default function StudyArchitect() {
                                   <span className={cn(
                                     "text-xs px-2 py-0.5 rounded-full border",
                                     task.priority === 'high' ? "bg-red-100 text-red-700 border-red-200" :
-                                    task.priority === 'medium' ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
-                                    "bg-green-100 text-green-700 border-green-200"
+                                      task.priority === 'medium' ? "bg-yellow-100 text-yellow-700 border-yellow-200" :
+                                        "bg-green-100 text-green-700 border-green-200"
                                   )}>
                                     {task.priority}
                                   </span>
