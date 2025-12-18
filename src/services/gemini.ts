@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize Gemini
 // Note: In a real production app, this should be a backend call to protect the API key.
 // For this portfolio/demo, we'll use a public-facing key or environment variable.
-const genAI = new GoogleGenerativeAI("AIzaSyAtWWL08-vLKMu1And_p2rFku5yZ3_0GiI");
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
 
 const MODEL_NAME = "gemini-1.5-pro";
 
