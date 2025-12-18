@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Tesseract from 'tesseract.js';
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Calendar as CalendarIcon, Upload, Loader2, BookOpen, Clock, Brain, Chec
 import { cn } from "@/lib/utils";
 import { extractSubjects, generateStudyPlan } from "@/services/gemini";
 import { useToast } from "@/hooks/use-toast";
+import { useAppContext } from "@/contexts/AppContext";
 
 interface Subject {
   name: string;
@@ -39,6 +41,9 @@ interface StudyPlanResponse {
 }
 
 export default function StudyArchitect() {
+  const navigate = useNavigate();
+  const { setStudyPlan, setSubjects: setGlobalSubjects } = useAppContext();
+
   // Step 1: Input, Step 2: Priority Selection, Step 3: Results
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -116,8 +121,13 @@ export default function StudyArchitect() {
         startDate: startDate!.toISOString().split('T')[0],
         highPrioritySubjects: selectedPriorities,
       });
-      setPlan(result);
-      setStep(3);
+
+      // Save to global context
+      setStudyPlan(result);
+      setGlobalSubjects(subjects);
+
+      // Navigate to timetable page
+      navigate('/study-timetable');
     } catch (error) {
       console.error("Generation Error:", error);
       toast({
