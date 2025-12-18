@@ -12,7 +12,7 @@ const groq = new Groq({
   dangerouslyAllowBrowser: true, // Required for client-side usage
 });
 
-const MODEL_NAME = "llama-3.1-70b-versatile";
+const MODEL_NAME = "llama-3.3-70b-versatile";
 
 interface GeneratePlanParams {
   examData: string;
