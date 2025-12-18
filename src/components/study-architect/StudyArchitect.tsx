@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Tesseract from 'tesseract.js';
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,11 +55,28 @@ export default function StudyArchitect() {
 
     setLoading(true);
     try {
+      let finalExamData = examData;
+
+      if (imageFile) {
+        toast({
+          title: "Reading Image...",
+          description: "Extracting text from your timetable using local OCR.",
+        });
+
+        const { data: { text } } = await Tesseract.recognize(
+          imageFile,
+          'eng',
+          { logger: m => console.log(m) }
+        );
+
+        console.log("OCR Result:", text);
+        finalExamData += `\n\n[Extracted from Image]:\n${text}`;
+      }
+
       const result = await generateStudyPlan({
-        examData,
+        examData: finalExamData,
         availability,
         startDate: startDate.toISOString().split('T')[0],
-        image: imageFile,
       });
       setPlan(result);
       setStep(2);
