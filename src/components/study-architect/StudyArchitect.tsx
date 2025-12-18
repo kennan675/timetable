@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { extractSubjects, generateStudyPlan } from "@/services/gemini";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/contexts/AppContext";
+import { Navigation } from "@/components/Navigation";
 
 interface Subject {
   name: string;
@@ -150,30 +151,31 @@ export default function StudyArchitect() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-4 md:p-8 dark:from-slate-950 dark:to-slate-900">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 p-4 md:p-8">
+      <Navigation />
+      <div className="max-w-4xl mx-auto space-y-8 py-8">
         <header className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 mb-4">
-            <Brain className="w-8 h-8 text-primary" />
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/10 mb-4">
+            <Brain className="w-8 h-8 text-purple-300" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+          <h1 className="text-4xl font-bold tracking-tight text-white">
             AI Study Architect
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
+          <p className="text-blue-200 max-w-lg mx-auto">
             Transform messy exam schedules into optimized, stress-free study plans.
           </p>
 
           {/* Progress Indicator */}
           <div className="flex items-center justify-center gap-2 pt-4">
-            {[1, 2, 3].map((s) => (
+            {[1, 2].map((s) => (
               <div key={s} className="flex items-center">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all",
-                  step >= s ? "bg-primary text-white" : "bg-slate-200 text-slate-500"
+                  step >= s ? "bg-yellow-400 text-blue-900" : "bg-white/20 text-white/50"
                 )}>
                   {s}
                 </div>
-                {s < 3 && <div className={cn("w-12 h-1 mx-1", step > s ? "bg-primary" : "bg-slate-200")} />}
+                {s < 2 && <div className={cn("w-12 h-1 mx-1", step > s ? "bg-yellow-400" : "bg-white/20")} />}
               </div>
             ))}
           </div>
@@ -188,40 +190,40 @@ export default function StudyArchitect() {
               exit={{ opacity: 0, y: -20 }}
               className="grid gap-6"
             >
-              <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
+              <Card className="border border-white/20 shadow-lg bg-white/5 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle>Step 1: Enter Your Exam Schedule</CardTitle>
-                  <CardDescription>Paste your timetable or upload an image.</CardDescription>
+                  <CardTitle className="text-white">Step 1: Enter Your Exam Schedule</CardTitle>
+                  <CardDescription className="text-blue-200">Paste your timetable or upload an image.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Exam Data</Label>
+                    <Label className="text-white">Exam Data</Label>
                     <Textarea
                       placeholder="e.g., Math on Dec 20, Physics on Dec 22, Chemistry on Dec 25..."
-                      className="min-h-[100px] resize-none"
+                      className="min-h-[100px] resize-none bg-white/10 border-white/20 text-white placeholder:text-white/50"
                       value={examData}
                       onChange={(e) => setExamData(e.target.value)}
                     />
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
+                        <span className="w-full border-t border-white/20" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white dark:bg-slate-900 px-2 text-muted-foreground">Or upload an image</span>
+                        <span className="bg-blue-900 px-2 text-blue-200">Or upload an image</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <Input
                         type="file"
                         accept="image/*"
-                        className="cursor-pointer"
+                        className="cursor-pointer bg-white/10 border-white/20 text-white file:bg-yellow-400 file:text-blue-900 file:border-0 file:mr-4 file:py-2 file:px-4"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) setImageFile(file);
                         }}
                       />
                       {imageFile && (
-                        <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                        <span className="text-sm text-green-400 font-medium flex items-center gap-1">
                           <CheckCircle className="w-4 h-4" /> Attached
                         </span>
                       )}
@@ -230,23 +232,24 @@ export default function StudyArchitect() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label>Daily Availability</Label>
+                      <Label className="text-white">Daily Availability</Label>
                       <Input
                         value={availability}
                         onChange={(e) => setAvailability(e.target.value)}
                         placeholder="e.g., 4 hours weekdays, 8 weekends"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Start Date</Label>
+                      <Label className="text-white">Start Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
                             className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !startDate && "text-muted-foreground"
+                              "w-full justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20",
+                              !startDate && "text-white/50"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -267,7 +270,7 @@ export default function StudyArchitect() {
 
                   <Button
                     size="lg"
-                    className="w-full text-lg font-semibold h-12 bg-gradient-to-r from-primary to-purple-600"
+                    className="w-full text-lg font-semibold h-12 bg-yellow-400 hover:bg-yellow-500 text-blue-900"
                     onClick={handleAnalyze}
                     disabled={loading}
                   >
@@ -295,16 +298,16 @@ export default function StudyArchitect() {
               exit={{ opacity: 0, y: -20 }}
               className="grid gap-6"
             >
-              <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
+              <Card className="border border-white/20 shadow-lg bg-white/5 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle>Step 2: Select High Priority Subjects</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Step 2: Select High Priority Subjects</CardTitle>
+                  <CardDescription className="text-blue-200">
                     We found {subjects.length} subjects. Check the ones you want to prioritize (more study time).
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {subjects.length === 0 ? (
-                    <p className="text-center text-slate-500 py-8">No subjects found. Please go back and try again.</p>
+                    <p className="text-center text-blue-200 py-8">No subjects found. Please go back and try again.</p>
                   ) : (
                     <div className="grid gap-3">
                       {subjects.map((subject, idx) => (
@@ -313,21 +316,22 @@ export default function StudyArchitect() {
                           className={cn(
                             "flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all",
                             selectedPriorities.includes(subject.name)
-                              ? "border-primary bg-primary/5"
-                              : "border-slate-200 hover:border-slate-300 dark:border-slate-700"
+                              ? "border-yellow-400 bg-yellow-400/10"
+                              : "border-white/20 hover:border-white/40 bg-white/5"
                           )}
                           onClick={() => togglePriority(subject.name)}
                         >
                           <Checkbox
                             checked={selectedPriorities.includes(subject.name)}
                             onCheckedChange={() => togglePriority(subject.name)}
+                            className="border-white/40 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
                           />
                           <div className="flex-1">
-                            <div className="font-semibold text-lg">{subject.name}</div>
-                            <div className="text-sm text-slate-500">Exam: {subject.examDate}</div>
+                            <div className="font-semibold text-lg text-white">{subject.name}</div>
+                            <div className="text-sm text-blue-200">Exam: {subject.examDate}</div>
                           </div>
                           {selectedPriorities.includes(subject.name) && (
-                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                            <span className="text-xs font-bold text-yellow-400 bg-yellow-400/20 px-2 py-1 rounded">
                               HIGH PRIORITY
                             </span>
                           )}
@@ -337,12 +341,12 @@ export default function StudyArchitect() {
                   )}
 
                   <div className="flex gap-4 pt-4">
-                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-white/20 text-white hover:bg-white/10">
                       ← Back
                     </Button>
                     <Button
                       size="lg"
-                      className="flex-1 bg-gradient-to-r from-primary to-purple-600"
+                      className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-blue-900"
                       onClick={handleGeneratePlan}
                       disabled={loading || subjects.length === 0}
                     >
