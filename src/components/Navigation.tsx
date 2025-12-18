@@ -21,9 +21,9 @@ export const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-tr from-purple-600 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-              S
+              K
             </div>
-            <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">StudyFlow AI</span>
+            <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">Your Personal Study Hub</span>
           </div>
 
           <div className="hidden md:flex space-x-8">
