@@ -13,7 +13,7 @@ export const Navigation = () => {
     { label: 'Home', path: '/' },
     { label: 'Exam Timetable', path: '/study-timetable' },
     { label: 'Study Plan', path: '/study-plan' },
-    { label: 'My Motivation', path: '/praise' }
+
   ];
 
   return (
@@ -28,8 +28,7 @@ export const Navigation = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `text-white hover:text-yellow-300 transition-colors font-medium ${
-                    isActive ? 'text-yellow-300' : ''
+                  `text-white hover:text-yellow-300 transition-colors font-medium ${isActive ? 'text-yellow-300' : ''
                   }`
                 }
                 onClick={() => setIsOpen(false)}
@@ -56,8 +55,7 @@ export const Navigation = () => {
                 key={`${item.path}-mobile`}
                 to={item.path}
                 className={({ isActive }) =>
-                  `block w-full text-left text-white hover:bg-white/10 px-4 py-2 rounded ${
-                    isActive ? 'bg-white/10 text-yellow-300' : ''
+                  `block w-full text-left text-white hover:bg-white/10 px-4 py-2 rounded ${isActive ? 'bg-white/10 text-yellow-300' : ''
                   }`
                 }
                 onClick={() => setIsOpen(false)}

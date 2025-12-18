@@ -8,7 +8,8 @@ import { AppProvider } from "@/contexts/AppContext";
 import Index from "./pages/Index";
 import StudyTimetable from "./pages/StudyTimetable";
 import StudyPlan from "./pages/StudyPlan";
-import Praise from "./pages/Praise";
+
+import StudyArchitect from "./components/study-architect/StudyArchitect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +26,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/study-timetable" element={<StudyTimetable />} />
               <Route path="/study-plan" element={<StudyPlan />} />
-              <Route path="/praise" element={<Praise />} />
+
+              <Route path="/study-architect" element={<StudyArchitect />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppProvider>
