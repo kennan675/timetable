@@ -1,16 +1,18 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-// Initialize Gemini
+// Initialize Groq
 // Note: In a real production app, this should be a backend call to protect the API key.
-// For this portfolio/demo, we'll use a public-facing key or environment variable.
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 if (!apiKey) {
-  console.error("Missing Gemini API Key. Make sure VITE_GEMINI_API_KEY is set in .env");
+  console.error("Missing Groq API Key. Make sure VITE_GROQ_API_KEY is set in .env");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey || "");
+const groq = new Groq({
+  apiKey: apiKey || "",
+  dangerouslyAllowBrowser: true, // Required for client-side usage
+});
 
-const MODEL_NAME = "gemini-pro";
+const MODEL_NAME = "llama-3.1-70b-versatile";
 
 interface GeneratePlanParams {
   examData: string;
@@ -19,10 +21,9 @@ interface GeneratePlanParams {
 }
 
 export const generateStudyPlan = async ({ examData, availability, startDate }: GeneratePlanParams) => {
-  if (!import.meta.env.VITE_GEMINI_API_KEY) {
+  if (!import.meta.env.VITE_GROQ_API_KEY) {
     throw new Error("API Key missing. Please check your .env file and restart the server.");
   }
-  const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
   const prompt = `
 ### ROLE
@@ -65,16 +66,27 @@ Schema:
 `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: MODEL_NAME,
+      temperature: 0.7,
+      max_tokens: 4096,
+      response_format: { type: "json_object" },
+    });
+
+    const text = chatCompletion.choices[0]?.message?.content || "";
 
     // Clean up markdown code blocks if present
     const cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     return JSON.parse(cleanText);
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Groq API Error:", error);
     throw error;
   }
 };
