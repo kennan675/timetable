@@ -63,9 +63,10 @@ export default function StudyArchitect() {
       setPlan(result);
       setStep(2);
     } catch (error) {
+      console.error("Study Architect Error:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate study plan. Please try again.",
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     } finally {

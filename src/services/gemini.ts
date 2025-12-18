@@ -3,7 +3,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Initialize Gemini
 // Note: In a real production app, this should be a backend call to protect the API key.
 // For this portfolio/demo, we'll use a public-facing key or environment variable.
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || "");
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("Missing Gemini API Key. Make sure VITE_GEMINI_API_KEY is set in .env");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
 const MODEL_NAME = "gemini-1.5-pro";
 
@@ -32,6 +37,9 @@ interface GeneratePlanParams {
 }
 
 export const generateStudyPlan = async ({ examData, availability, startDate, image }: GeneratePlanParams) => {
+  if (!import.meta.env.VITE_GEMINI_API_KEY) {
+    throw new Error("API Key missing. Please check your .env file and restart the server.");
+  }
   const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
   let textPrompt = `

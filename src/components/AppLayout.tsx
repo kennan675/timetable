@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Navigation } from './Navigation';
 import { CountdownTimer } from './CountdownTimer';
 import { DigitalClock } from './DigitalClock';
@@ -7,6 +8,8 @@ import { QuoteRotator } from './QuoteRotator';
 import { Footer } from './Footer';
 
 export default function AppLayout() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
       <Navigation />
@@ -37,7 +40,10 @@ export default function AppLayout() {
           </p>
 
           <div className="mb-12">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all cursor-pointer group" onClick={() => window.location.href = '/study-architect'}>
+            <div
+              className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all cursor-pointer group"
+              onClick={() => navigate('/study-architect')}
+            >
               <h3 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
                 🚀 AI Study Architect
               </h3>
