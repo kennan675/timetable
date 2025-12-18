@@ -19,9 +19,16 @@ const StudyTimetable = () => (
 
       <section className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exams.map((exam, idx) => (
-            <ExamCard key={exam.unitCode} exam={exam} index={idx} />
-          ))}
+          {exams.length > 0 ? (
+            exams.map((exam, idx) => (
+              <ExamCard key={exam.unitCode} exam={exam} index={idx} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+              <p className="text-xl text-white mb-4">No exams scheduled yet.</p>
+              <p className="text-blue-200">Use the <a href="/study-architect" className="text-yellow-300 hover:underline font-semibold">AI Architect</a> to generate your plan from your timetable image!</p>
+            </div>
+          )}
         </div>
       </section>
     </main>

@@ -41,10 +41,7 @@ export const Navigation = () => {
               </NavLink>
             ))}
             <div className="pl-4 border-l border-slate-200 dark:border-slate-700 flex items-center gap-4">
-              <NavLink to="/study-architect" className="text-sm font-medium text-slate-600 hover:text-slate-900">Sign In</NavLink>
-              <NavLink to="/study-architect" className="bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-slate-800 transition-colors">
-                Get Started
-              </NavLink>
+              {/* Auth buttons removed by request */}
             </div>
           </div>
 
