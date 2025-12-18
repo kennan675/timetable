@@ -6,14 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Upload, Loader2, BookOpen, Clock, Brain, CheckCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Upload, Loader2, BookOpen, Clock, Brain, CheckCircle, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { generateStudyPlan } from "@/services/gemini";
+import { extractSubjects, generateStudyPlan } from "@/services/gemini";
 import { useToast } from "@/hooks/use-toast";
+
+interface Subject {
+  name: string;
+  examDate: string;
+}
 
 interface StudyPlanResponse {
   summary: {
@@ -34,16 +39,29 @@ interface StudyPlanResponse {
 }
 
 export default function StudyArchitect() {
+  // Step 1: Input, Step 2: Priority Selection, Step 3: Results
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
+  // Step 1 data
   const [examData, setExamData] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [availability, setAvailability] = useState("4 hours on weekdays, 8 on weekends");
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+
+  // Step 2 data
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
+  const [finalExamData, setFinalExamData] = useState("");
+
+  // Step 3 data
   const [plan, setPlan] = useState<StudyPlanResponse | null>(null);
+
   const { toast } = useToast();
 
-  const handleGenerate = async () => {
+  // Step 1: Analyze and extract subjects
+  const handleAnalyze = async () => {
     if ((!examData && !imageFile) || !startDate) {
       toast({
         title: "Missing Information",
@@ -55,33 +73,53 @@ export default function StudyArchitect() {
 
     setLoading(true);
     try {
-      let finalExamData = examData;
+      let combinedExamData = examData;
 
       if (imageFile) {
-        toast({
-          title: "Reading Image...",
-          description: "Extracting text from your timetable using local OCR.",
-        });
+        setLoadingMessage("Reading image with OCR...");
+        toast({ title: "Reading Image...", description: "Extracting text from your timetable." });
 
-        const { data: { text } } = await Tesseract.recognize(
-          imageFile,
-          'eng',
-          { logger: m => console.log(m) }
-        );
-
+        const { data: { text } } = await Tesseract.recognize(imageFile, 'eng');
         console.log("OCR Result:", text);
-        finalExamData += `\n\n[Extracted from Image]:\n${text}`;
+        combinedExamData += `\n\n[Extracted from Image]:\n${text}`;
       }
 
+      setFinalExamData(combinedExamData);
+      setLoadingMessage("AI is analyzing your subjects...");
+
+      const result = await extractSubjects(combinedExamData);
+      setSubjects(result.subjects || []);
+      setSelectedPriorities([]); // Reset selections
+      setStep(2);
+    } catch (error) {
+      console.error("Analysis Error:", error);
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setLoadingMessage("");
+    }
+  };
+
+  // Step 2: Generate plan with selected priorities
+  const handleGeneratePlan = async () => {
+    setLoading(true);
+    setLoadingMessage("Generating your optimized study plan...");
+
+    try {
       const result = await generateStudyPlan({
         examData: finalExamData,
         availability,
-        startDate: startDate.toISOString().split('T')[0],
+        startDate: startDate!.toISOString().split('T')[0],
+        highPrioritySubjects: selectedPriorities,
       });
       setPlan(result);
-      setStep(2);
+      setStep(3);
     } catch (error) {
-      console.error("Study Architect Error:", error);
+      console.error("Generation Error:", error);
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "An unknown error occurred",
@@ -89,7 +127,16 @@ export default function StudyArchitect() {
       });
     } finally {
       setLoading(false);
+      setLoadingMessage("");
     }
+  };
+
+  const togglePriority = (subjectName: string) => {
+    setSelectedPriorities(prev =>
+      prev.includes(subjectName)
+        ? prev.filter(s => s !== subjectName)
+        : [...prev, subjectName]
+    );
   };
 
   return (
@@ -103,11 +150,27 @@ export default function StudyArchitect() {
             AI Study Architect
           </h1>
           <p className="text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
-            Transform messy exam schedules into optimized, stress-free study plans using cognitive science.
+            Transform messy exam schedules into optimized, stress-free study plans.
           </p>
+
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center gap-2 pt-4">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className="flex items-center">
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all",
+                  step >= s ? "bg-primary text-white" : "bg-slate-200 text-slate-500"
+                )}>
+                  {s}
+                </div>
+                {s < 3 && <div className={cn("w-12 h-1 mx-1", step > s ? "bg-primary" : "bg-slate-200")} />}
+              </div>
+            ))}
+          </div>
         </header>
 
         <AnimatePresence mode="wait">
+          {/* STEP 1: Input Exam Data */}
           {step === 1 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -117,14 +180,14 @@ export default function StudyArchitect() {
             >
               <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
                 <CardHeader>
-                  <CardTitle>Configure Your Plan</CardTitle>
-                  <CardDescription>Tell us about your exams and availability.</CardDescription>
+                  <CardTitle>Step 1: Enter Your Exam Schedule</CardTitle>
+                  <CardDescription>Paste your timetable or upload an image.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Raw Exam Data</Label>
+                    <Label>Exam Data</Label>
                     <Textarea
-                      placeholder="Paste your exam schedule here (e.g., 'Math on Dec 20, Physics on Dec 22')..."
+                      placeholder="e.g., Math on Dec 20, Physics on Dec 22, Chemistry on Dec 25..."
                       className="min-h-[100px] resize-none"
                       value={examData}
                       onChange={(e) => setExamData(e.target.value)}
@@ -194,19 +257,18 @@ export default function StudyArchitect() {
 
                   <Button
                     size="lg"
-                    className="w-full text-lg font-semibold h-12 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg hover:shadow-primary/25"
-                    onClick={handleGenerate}
+                    className="w-full text-lg font-semibold h-12 bg-gradient-to-r from-primary to-purple-600"
+                    onClick={handleAnalyze}
                     disabled={loading}
                   >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Analyzing Timetable...
+                        {loadingMessage || "Analyzing..."}
                       </>
                     ) : (
                       <>
-                        <Upload className="mr-2 h-5 w-5" />
-                        Generate Optimized Plan
+                        Analyze Subjects <ArrowRight className="ml-2 h-5 w-5" />
                       </>
                     )}
                   </Button>
@@ -215,7 +277,84 @@ export default function StudyArchitect() {
             </motion.div>
           )}
 
-          {step === 2 && plan && (
+          {/* STEP 2: Priority Selection */}
+          {step === 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="grid gap-6"
+            >
+              <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
+                <CardHeader>
+                  <CardTitle>Step 2: Select High Priority Subjects</CardTitle>
+                  <CardDescription>
+                    We found {subjects.length} subjects. Check the ones you want to prioritize (more study time).
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {subjects.length === 0 ? (
+                    <p className="text-center text-slate-500 py-8">No subjects found. Please go back and try again.</p>
+                  ) : (
+                    <div className="grid gap-3">
+                      {subjects.map((subject, idx) => (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                            selectedPriorities.includes(subject.name)
+                              ? "border-primary bg-primary/5"
+                              : "border-slate-200 hover:border-slate-300 dark:border-slate-700"
+                          )}
+                          onClick={() => togglePriority(subject.name)}
+                        >
+                          <Checkbox
+                            checked={selectedPriorities.includes(subject.name)}
+                            onCheckedChange={() => togglePriority(subject.name)}
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-lg">{subject.name}</div>
+                            <div className="text-sm text-slate-500">Exam: {subject.examDate}</div>
+                          </div>
+                          {selectedPriorities.includes(subject.name) && (
+                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                              HIGH PRIORITY
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-4 pt-4">
+                    <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+                      ← Back
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="flex-1 bg-gradient-to-r from-primary to-purple-600"
+                      onClick={handleGeneratePlan}
+                      disabled={loading || subjects.length === 0}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          {loadingMessage || "Generating..."}
+                        </>
+                      ) : (
+                        <>
+                          Generate Plan <ArrowRight className="ml-2 h-5 w-5" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* STEP 3: Results */}
+          {step === 3 && plan && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -269,7 +408,7 @@ export default function StudyArchitect() {
 
                         <div className="space-y-4">
                           {day.tasks.map((task, tIdx) => (
-                            <div key={tIdx} className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 grid gap-2 relative group">
+                            <div key={tIdx} className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 grid gap-2">
                               <div className="flex items-center justify-between">
                                 <h3 className="font-semibold text-lg flex items-center gap-2">
                                   {task.subject}
@@ -321,7 +460,7 @@ export default function StudyArchitect() {
 
               <div className="flex justify-center pt-8">
                 <Button variant="outline" onClick={() => setStep(1)} className="mr-4">
-                  Adjust Inputs
+                  Start Over
                 </Button>
                 <Button onClick={() => window.print()}>
                   Export / Print
